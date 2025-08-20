@@ -100,7 +100,7 @@ Root mode auto‑detection:
 
 ```go
 mask, err := kino.ParseMask("a,-b,c:(d,-e),f:(g,h),i,-z:(-y,x)")
-if err != nil { panic(err) }
+if err != nil { /* handle error */ }
 fmt.Println(mask.Mode)        // Positive
 fmt.Println(mask.String())    // stable string form
 ```
@@ -131,7 +131,8 @@ Load with experimental unmarshalers (structure preserved):
 
 ```go
 var m kino.Mask
-if err := json.Unmarshal(data, &m, json.WithUnmarshalers(kino.MaskUnmarshalers())); err != nil { /* handle */ }
+err := json.Unmarshal(data, &m, json.WithUnmarshalers(kino.MaskUnmarshalers()))
+if err != nil { /* handle error */ }
 ```
 
 ## Override includes inside excluded subtrees
