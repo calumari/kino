@@ -36,6 +36,49 @@ These may be added selectively if they can remain ergonomic and zero/low‑overh
 go get github.com/calumari/kino
 ```
 
+## Quick example
+
+Masking a simple struct (include only selected fields + nested subfield):
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/calumari/kino"
+	"github.com/go-json-experiment/json"
+)
+
+type User struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Meta  struct {
+		Plan     string `json:"plan"`
+		Internal string `json:"internal"`
+	} `json:"meta"`
+}
+
+func main() {
+	u := User{ID: 1, Name: "Ada", Email: "ada@example.com"}
+	u.Meta.Plan = "pro"
+	u.Meta.Internal = "secret"
+
+	// Keep id, name and meta.plan only.
+	mask, _ := kino.ParseMask("id,name,meta:(plan)")
+	out, _ := json.Marshal(u, json.WithMarshalers(kino.MarshalWithMask(mask)))
+	fmt.Println(string(out)) // {"id":1,"name":"Ada","meta":{"plan":"pro"}}
+}
+```
+
+Override example (exclude whole object but keep one child):
+
+```go
+mask, _ := kino.ParseMask("-meta:(plan)")
+// Produces: {"meta":{"plan":"pro"}}
+```
+
 ## Mask expression syntax
 
 Compact, comma‑separated list of field specs:
@@ -88,9 +131,7 @@ Load with experimental unmarshalers (structure preserved):
 
 ```go
 var m kino.Mask
-if err := json.Unmarshal(data, &m, json.WithUnmarshalers(kino.MaskUnmarshalers())); err != nil {
-    // handle
-}
+if err := json.Unmarshal(data, &m, json.WithUnmarshalers(kino.MaskUnmarshalers())); err != nil { /* handle */ }
 ```
 
 ## Override includes inside excluded subtrees
