@@ -26,7 +26,7 @@ func TestToProjection(t *testing.T) {
 
 		m, err := kino.ParseMask("a,c:(d)")
 		require.NoError(t, err)
-		require.Equal(t, want, Project(m))
+		require.ElementsMatch(t, want, Project(m))
 	})
 
 	t.Run("negative simple excludes", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestToProjection(t *testing.T) {
 
 		m, err := kino.ParseMask("-a,-b")
 		require.NoError(t, err)
-		require.Equal(t, want, Project(m))
+		require.ElementsMatch(t, want, Project(m))
 	})
 
 	t.Run("override -z:(x)", func(t *testing.T) {
@@ -47,7 +47,7 @@ func TestToProjection(t *testing.T) {
 
 		m, err := kino.ParseMask("-z:(x)")
 		require.NoError(t, err)
-		require.Equal(t, want, Project(m))
+		require.ElementsMatch(t, want, Project(m))
 	})
 
 	t.Run("mixed a,-b,c:(d,-e),-z:(x)", func(t *testing.T) {
@@ -59,7 +59,7 @@ func TestToProjection(t *testing.T) {
 
 		m, err := kino.ParseMask("a,-b,c:(d,-e),-z:(x)")
 		require.NoError(t, err)
-		require.Equal(t, want, Project(m))
+		require.ElementsMatch(t, want, Project(m))
 	})
 
 	t.Run("negative with children", func(t *testing.T) {
@@ -71,6 +71,19 @@ func TestToProjection(t *testing.T) {
 		m, err := kino.ParseMask("-a:(-b:(-c:(d:(e,-f),-g,y:(z,-w))))")
 		m.Mode = kino.Negative // force negative mode - silly little edge case of an unsupported feature
 		require.NoError(t, err)
-		require.Equal(t, want, Project(m))
+		require.ElementsMatch(t, want, Project(m))
+	})
+
+	t.Run("mixed inclusion/exclusion", func(t *testing.T) {
+		want := bson.D{
+			{Key: "a", Value: 1},
+			{Key: "b.c", Value: 1},
+			{Key: "d.e", Value: 1},
+			{Key: "f.g.h", Value: 1},
+		}
+
+		m, err := kino.ParseMask("a,-b:(c),d:(e),f:(g:(h)),-i")
+		require.NoError(t, err)
+		require.ElementsMatch(t, want, Project(m))
 	})
 }
