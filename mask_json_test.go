@@ -1,10 +1,11 @@
 package kino_test
 
 import (
-	jsonv1 "encoding/json"
+	"bytes"
 	"testing"
 
 	"github.com/calumari/kino"
+	"github.com/go-json-experiment/json"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,14 +19,19 @@ func TestMaskJSON(t *testing.T) {
 				"e": {Op: kino.Negative},
 			})),
 		})
-		data, err := jsonv1.Marshal(m)
+
+		var buf bytes.Buffer
+		err := json.MarshalWrite(&buf, m)
 		require.NoError(t, err)
-		require.JSONEq(t, `{"a":true,"b":false,"c":{"d":true,"e":false}}`, string(data))
+		require.JSONEq(t, `{"a":true,"b":false,"c":{"d":true,"e":false}}`, buf.String())
 
 		var m2 kino.Mask
-		require.NoError(t, jsonv1.Unmarshal(data, &m2))
-		data2, err := jsonv1.Marshal(&m2)
+		err = json.UnmarshalRead(bytes.NewReader(buf.Bytes()), &m2)
 		require.NoError(t, err)
-		require.JSONEq(t, string(data), string(data2))
+
+		var out bytes.Buffer
+		err = json.MarshalWrite(&out, m2)
+		require.NoError(t, err)
+		require.JSONEq(t, buf.String(), out.String())
 	})
 }

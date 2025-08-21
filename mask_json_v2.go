@@ -2,7 +2,6 @@ package kino
 
 import (
 	"bytes"
-	jsonv1 "encoding/json"
 	"fmt"
 
 	"github.com/go-json-experiment/json"
@@ -82,7 +81,7 @@ func MaskUnmarshalers() *json.Unmarshalers {
 func MarshalWithMask(m *Mask) *json.Marshalers {
 	return json.MarshalToFunc(func(enc *jsontext.Encoder, v any) error {
 		var buf bytes.Buffer
-		if err := jsonv1.NewEncoder(&buf).Encode(v); err != nil {
+		if err := json.MarshalWrite(&buf, v); err != nil {
 			return fmt.Errorf("marshal mask source: %w", err)
 		}
 		dec := jsontext.NewDecoder(&buf)
