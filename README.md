@@ -2,7 +2,7 @@
 
 <p align="center">
   <picture>
-    <img src="assets/logo.png" alt="Golang Gopher with film camera" width="210" height="210" /><br>
+    <img src="assets/logo.svg" alt="Golang Gopher with film camera" width="200"/>
   </picture>
 </p>
 
