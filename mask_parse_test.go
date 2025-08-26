@@ -51,4 +51,15 @@ func TestParseMask(t *testing.T) {
 		require.NotNil(t, zNode.Children)
 		require.Equal(t, kino.Positive, zNode.Children.Fields["x"].Op)
 	})
+
+	t.Run("z:(-x) structure parsed", func(t *testing.T) {
+		m, err := kino.ParseMask("z:(-x)")
+		require.NoError(t, err)
+		require.Equal(t, kino.Positive, m.Mode)
+		require.Len(t, m.Fields, 1)
+		zNode := m.Fields["z"]
+		require.Equal(t, kino.Positive, zNode.Op)
+		require.NotNil(t, zNode.Children)
+		require.Equal(t, kino.Negative, zNode.Children.Fields["x"].Op)
+	})
 }

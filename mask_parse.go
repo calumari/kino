@@ -20,26 +20,30 @@ func ParseMask(s string) (*Mask, error) {
 	idx := 0
 	currentState := stateParseField
 	root := &Mask{Mode: Positive, Fields: make(map[string]*Node)}
-	stack := []*Mask{root}
+	// Frame tracks a mask plus whether it has seen positive / negative entries.
+	type frame struct {
+		m      *Mask
+		hasPos bool
+		hasNeg bool
+	}
+	stack := []frame{{m: root}}
 	var fieldName string
 	var op Op
 	pendingField := false
-	seenInclude := false
-	seenExclude := false
 
 	addLeaf := func(name string, op Op) error {
 		if name == "" {
 			return fmt.Errorf("empty field at index %d", idx)
 		}
-		cur := stack[len(stack)-1]
-		if _, exists := cur.Fields[name]; exists {
+		cur := &stack[len(stack)-1]
+		if _, exists := cur.m.Fields[name]; exists {
 			return fmt.Errorf("duplicate field '%s' at index %d", name, idx)
 		}
-		cur.Fields[name] = &Node{Op: op}
+		cur.m.Fields[name] = &Node{Op: op}
 		if op == Positive {
-			seenInclude = true
+			cur.hasPos = true
 		} else {
-			seenExclude = true
+			cur.hasNeg = true
 		}
 		return nil
 	}
@@ -47,18 +51,21 @@ func ParseMask(s string) (*Mask, error) {
 		if name == "" {
 			return fmt.Errorf("empty field before ':' at index %d", idx)
 		}
-		cur := stack[len(stack)-1]
-		if _, exists := cur.Fields[name]; exists {
+		cur := &stack[len(stack)-1]
+		if _, exists := cur.m.Fields[name]; exists {
 			return fmt.Errorf("duplicate field '%s' at index %d", name, idx)
 		}
 		child := &Mask{Mode: Positive, Fields: make(map[string]*Node)}
-		cur.Fields[name] = &Node{Op: op, Children: child}
+		cur.m.Fields[name] = &Node{Op: op, Children: child}
+		// Update counters for parent (based on the node op itself).
 		if op == Positive {
-			seenInclude = true
+			cur.hasPos = true
 		} else {
-			seenExclude = true
+			cur.hasNeg = true
 		}
-		stack = append(stack, child)
+		// Push new frame for child (its own counters start empty; its Mode will
+		// be determined when we close its frame on ascend).
+		stack = append(stack, frame{m: child})
 		return nil
 	}
 	skipSpaces := func() {
@@ -168,6 +175,13 @@ func ParseMask(s string) (*Mask, error) {
 			if len(stack) <= 1 {
 				return nil, fmt.Errorf("unmatched ')' at index %d", idx)
 			}
+			// Finalize mode for the frame we're closing before popping.
+			closing := &stack[len(stack)-1]
+			if !closing.hasPos && closing.hasNeg {
+				closing.m.Mode = Negative
+			} else {
+				closing.m.Mode = Positive
+			}
 			stack = stack[:len(stack)-1]
 			pendingField = false
 			skipSpaces()
@@ -197,9 +211,12 @@ func ParseMask(s string) (*Mask, error) {
 	if len(stack) != 1 {
 		return nil, fmt.Errorf("unexpected end of string: missing closing ')'")
 	}
-	// Auto-detect root mode: only exclusions present => blacklist
-	if !seenInclude && seenExclude {
+	// Finalize root mode using its counters (root frame is stack[0]).
+	rootFrame := stack[0]
+	if !rootFrame.hasPos && rootFrame.hasNeg {
 		root.Mode = Negative
+	} else {
+		root.Mode = Positive
 	}
 	return root, nil
 }
