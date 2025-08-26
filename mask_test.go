@@ -3,8 +3,9 @@ package kino_test
 import (
 	"testing"
 
-	"github.com/calumari/kino"
 	"github.com/stretchr/testify/require"
+
+	"github.com/calumari/kino"
 )
 
 func TestMask_String(t *testing.T) {

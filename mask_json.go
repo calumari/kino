@@ -66,9 +66,10 @@ func (m *Mask) UnmarshalJSON(data []byte) error {
 		// Determine mode for this mask: negative-only => Negative.
 		hasPos, hasNeg := false, false
 		for _, n := range res.Fields {
-			if n.Op == Positive {
+			switch n.Op {
+			case Positive:
 				hasPos = true
-			} else if n.Op == Negative {
+			case Negative:
 				hasNeg = true
 			}
 		}

@@ -3,9 +3,10 @@ package kino_test
 import (
 	"testing"
 
-	"github.com/calumari/kino"
 	"github.com/go-json-experiment/json"
 	"github.com/stretchr/testify/require"
+
+	"github.com/calumari/kino"
 )
 
 type sample struct {

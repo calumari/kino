@@ -32,9 +32,10 @@ func MaskUnmarshalers() *json.Unmarshalers {
 		}
 		f := &frame{}
 		update := func(op Op) {
-			if op == Positive {
+			switch op {
+			case Positive:
 				f.hasPos = true
-			} else {
+			case Negative:
 				f.hasNeg = true
 			}
 		}

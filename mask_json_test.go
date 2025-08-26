@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/calumari/kino"
 	"github.com/stretchr/testify/require"
+
+	"github.com/calumari/kino"
 )
 
 func TestMaskJSON(t *testing.T) {

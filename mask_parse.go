@@ -40,9 +40,10 @@ func ParseMask(s string) (*Mask, error) {
 			return fmt.Errorf("duplicate field '%s' at index %d", name, idx)
 		}
 		cur.m.Fields[name] = &Node{Op: op}
-		if op == Positive {
+		switch op {
+		case Positive:
 			cur.hasPos = true
-		} else {
+		case Negative:
 			cur.hasNeg = true
 		}
 		return nil
@@ -58,9 +59,10 @@ func ParseMask(s string) (*Mask, error) {
 		child := &Mask{Mode: Positive, Fields: make(map[string]*Node)}
 		cur.m.Fields[name] = &Node{Op: op, Children: child}
 		// Update counters for parent (based on the node op itself).
-		if op == Positive {
+		switch op {
+		case Positive:
 			cur.hasPos = true
-		} else {
+		case Negative:
 			cur.hasNeg = true
 		}
 		// Push new frame for child (its own counters start empty; its Mode will

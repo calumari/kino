@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 
-	"github.com/calumari/kino"
 	"github.com/go-json-experiment/json"
+
+	"github.com/calumari/kino"
 )
 
 func main() {
@@ -39,7 +41,7 @@ func main() {
 	// Structural equality: compare JSON normalized forms.
 	origJSON, _ := json.Marshal(mask)
 	rtJSON, _ := json.Marshal(maskFromJSON)
-	fmt.Println("Round-trip equal?      ", string(origJSON) == string(rtJSON))
+	fmt.Println("Round-trip equal?      ", bytes.Equal(origJSON, rtJSON))
 
 	// Sample data to project with mask.
 	type Inner struct {
@@ -102,7 +104,7 @@ func main() {
 // topLevelKeys extracts JSON top-level object keys (best-effort, assumes no
 // escapes).
 func topLevelKeys(s string) []string {
-	if len(s) == 0 || s[0] != '{' {
+	if s == "" || s[0] != '{' {
 		return nil
 	}
 	var keys []string
