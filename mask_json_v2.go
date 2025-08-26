@@ -24,6 +24,20 @@ func MaskUnmarshalers() *json.Unmarshalers {
 		}
 		mask := v
 
+		// Track pos/neg for this object (nested objects recurse via another
+		// invocation, so a single frame is sufficient here unlike the parser's
+		// multi-level stack during expression parsing).
+		type frame struct {
+			hasPos, hasNeg bool
+		}
+		f := &frame{}
+		update := func(op Op) {
+			if op == Positive {
+				f.hasPos = true
+			} else {
+				f.hasNeg = true
+			}
+		}
 		for dec.PeekKind() != '}' {
 			// read key
 			var key string
@@ -41,6 +55,7 @@ func MaskUnmarshalers() *json.Unmarshalers {
 					return fmt.Errorf("decode child %q: %w", key, err)
 				}
 				mask.Fields[key] = &Node{Op: Positive, Children: &child}
+				update(Positive)
 			default:
 				var raw any
 				if err := json.UnmarshalDecode(dec, &raw); err != nil {
@@ -66,10 +81,17 @@ func MaskUnmarshalers() *json.Unmarshalers {
 					return fmt.Errorf("unexpected value type %T for key %q", raw, key)
 				}
 				mask.Fields[key] = &Node{Op: op}
+				update(op)
 			}
 		}
 		if _, err := dec.ReadToken(); err != nil { // consume closing '}'
 			return fmt.Errorf("read closing '}': %w", err)
+		}
+		// finalize mode for this mask (negative-only => Negative)
+		if !f.hasPos && f.hasNeg {
+			mask.Mode = Negative
+		} else {
+			mask.Mode = Positive
 		}
 		return nil
 	})

@@ -63,6 +63,20 @@ func (m *Mask) UnmarshalJSON(data []byte) error {
 				return nil, fmt.Errorf("unsupported value type %T for key %q", v, k)
 			}
 		}
+		// Determine mode for this mask: negative-only => Negative.
+		hasPos, hasNeg := false, false
+		for _, n := range res.Fields {
+			if n.Op == Positive {
+				hasPos = true
+			} else if n.Op == Negative {
+				hasNeg = true
+			}
+		}
+		if !hasPos && hasNeg {
+			res.Mode = Negative
+		} else {
+			res.Mode = Positive
+		}
 		return res, nil
 	}
 	built, err := build(generic)

@@ -29,4 +29,16 @@ func TestMaskJSON(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, string(data), string(data2))
 	})
+
+	t.Run("legacy unmarshal nested negative-only subtree sets negative mode", func(t *testing.T) {
+		data := []byte(`{"meta":{"secret":false}}`)
+		var m kino.Mask
+		require.NoError(t, json.Unmarshal(data, &m))
+		// Root has a positive child (object) so stays Positive.
+		require.Equal(t, kino.Positive, m.Mode)
+		child := m.Fields["meta"].Children
+		require.NotNil(t, child)
+		// Child contains only a negative => negative mode.
+		require.Equal(t, kino.Negative, child.Mode)
+	})
 }

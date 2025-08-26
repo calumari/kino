@@ -111,4 +111,14 @@ func TestMarshalWithMask(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, `[{"z":{"x":10}},{"z":{"x":10}}]`, string(out))
 	})
+
+	t.Run("unmarshalers nested negative-only subtree sets negative mode", func(t *testing.T) {
+		var m kino.Mask
+		data := []byte(`{"meta":{"secret":false}}`)
+		require.NoError(t, json.Unmarshal(data, &m, json.WithUnmarshalers(kino.MaskUnmarshalers())))
+		require.Equal(t, kino.Positive, m.Mode)
+		child := m.Fields["meta"].Children
+		require.NotNil(t, child)
+		require.Equal(t, kino.Negative, child.Mode)
+	})
 }
