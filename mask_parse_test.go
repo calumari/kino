@@ -8,34 +8,34 @@ import (
 )
 
 func TestParseMask(t *testing.T) {
-	t.Run("error double comma", func(t *testing.T) {
+	t.Run("double comma error", func(t *testing.T) {
 		_, err := kino.ParseMask("a,,b")
 		require.Error(t, err)
 	})
 
-	t.Run("error duplicate field", func(t *testing.T) {
+	t.Run("duplicate field error", func(t *testing.T) {
 		_, err := kino.ParseMask("a,a")
 		require.Error(t, err)
 	})
 
-	t.Run("error empty subtree", func(t *testing.T) {
+	t.Run("empty subtree error", func(t *testing.T) {
 		_, err := kino.ParseMask("a:()")
 		require.Error(t, err)
 	})
 
-	t.Run("mode positive", func(t *testing.T) {
+	t.Run("a,-b positive mode", func(t *testing.T) {
 		m, err := kino.ParseMask("a,-b")
 		require.NoError(t, err)
 		require.Equal(t, kino.Positive, m.Mode)
 	})
 
-	t.Run("mode negative", func(t *testing.T) {
+	t.Run("-a,-b negative mode", func(t *testing.T) {
 		m, err := kino.ParseMask("-a,-b")
 		require.NoError(t, err)
 		require.Equal(t, kino.Negative, m.Mode)
 	})
 
-	t.Run("structure a,-b,c:(d,-e),-z:(x)", func(t *testing.T) {
+	t.Run("a,-b,c:(d,-e),-z:(x) structure parsed", func(t *testing.T) {
 		m, err := kino.ParseMask("a,-b,c:(d,-e),-z:(x)")
 		require.NoError(t, err)
 		require.Equal(t, kino.Positive, m.Mode)

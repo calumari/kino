@@ -8,7 +8,7 @@ import (
 )
 
 func TestMask_String(t *testing.T) {
-	t.Run("deterministic ordering", func(t *testing.T) {
+	t.Run("deterministic ordering consistent", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"c": nodePos(maskPositive(map[string]*kino.Node{"d": {Op: kino.Positive}})),
 			"a": {Op: kino.Positive},

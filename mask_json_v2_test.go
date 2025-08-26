@@ -46,7 +46,7 @@ func nodeNeg(children *kino.Mask) *kino.Node {
 }
 
 func TestMarshalWithMask(t *testing.T) {
-	t.Run("positive root simple includes", func(t *testing.T) {
+	t.Run("positive root simple includes projected", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"a": {Op: kino.Positive},
 			"c": nodePos(maskPositive(map[string]*kino.Node{"d": {Op: kino.Positive}})),
@@ -56,7 +56,7 @@ func TestMarshalWithMask(t *testing.T) {
 		require.JSONEq(t, `{"a":"va","c":{"d":1}}`, string(out))
 	})
 
-	t.Run("negative root simple excludes -b,-c:(-e)", func(t *testing.T) {
+	t.Run("-b,-c:(-e) negative root excludes projected", func(t *testing.T) {
 		m := maskNegative(map[string]*kino.Node{
 			"b": {Op: kino.Negative},
 			"c": nodeNeg(maskPositive(map[string]*kino.Node{"e": {Op: kino.Negative}})),
@@ -66,7 +66,7 @@ func TestMarshalWithMask(t *testing.T) {
 		require.JSONEq(t, `{"a":"va","c":{},"z":{"x":10,"y":20}}`, string(out))
 	})
 
-	t.Run("negative root excludes single -c:(-e)", func(t *testing.T) {
+	t.Run("-c:(-e) negative root excludes single projected", func(t *testing.T) {
 		m := maskNegative(map[string]*kino.Node{
 			"c": nodeNeg(maskPositive(map[string]*kino.Node{"e": {Op: kino.Negative}})),
 		})
@@ -76,7 +76,7 @@ func TestMarshalWithMask(t *testing.T) {
 		require.JSONEq(t, `{"a":"va","b":"vb","c":{},"z":{"x":10,"y":20}}`, string(out))
 	})
 
-	t.Run("negative override reinclude nested -z:(x)", func(t *testing.T) {
+	t.Run("-z:(x) negative override reinclude projected", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{ // root positive because inner positive path exists
 			"z": nodeNeg(maskPositive(map[string]*kino.Node{"x": {Op: kino.Positive}})),
 		})
@@ -85,7 +85,7 @@ func TestMarshalWithMask(t *testing.T) {
 		require.JSONEq(t, `{"z":{"x":10}}`, string(out))
 	})
 
-	t.Run("complex mixed expression a,-b,c:(d,-e),-z:(x)", func(t *testing.T) {
+	t.Run("a,-b,c:(d,-e),-z:(x) complex mixed projected", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"a": {Op: kino.Positive},
 			"b": {Op: kino.Negative},
@@ -102,7 +102,7 @@ func TestMarshalWithMask(t *testing.T) {
 		require.JSONEq(t, `{"a":"va","c":{"d":1},"z":{"x":10}}`, string(out))
 	})
 
-	t.Run("arrays inherit mask -z:(x)", func(t *testing.T) {
+	t.Run("-z:(x) arrays inherit mask projected", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"z": nodeNeg(maskPositive(map[string]*kino.Node{"x": {Op: kino.Positive}})),
 		})

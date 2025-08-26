@@ -9,16 +9,16 @@ import (
 )
 
 func TestToProjection(t *testing.T) {
-	t.Run("nil mask", func(t *testing.T) {
+	t.Run("nil mask empty projection", func(t *testing.T) {
 		require.Equal(t, bson.D{}, Project(nil))
 	})
 
-	t.Run("empty mask", func(t *testing.T) {
+	t.Run("empty mask empty projection", func(t *testing.T) {
 		require.Equal(t, bson.D{}, Project(nil))
 		require.Equal(t, bson.D{}, Project(&kino.Mask{}))
 	})
 
-	t.Run("positive simple", func(t *testing.T) {
+	t.Run("a,c:(d) positive simple projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "a", Value: 1},
 			{Key: "c.d", Value: 1},
@@ -29,7 +29,7 @@ func TestToProjection(t *testing.T) {
 		require.ElementsMatch(t, want, Project(m))
 	})
 
-	t.Run("negative simple excludes", func(t *testing.T) {
+	t.Run("-a,-b negative simple excludes projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "a", Value: 0},
 			{Key: "b", Value: 0},
@@ -40,7 +40,7 @@ func TestToProjection(t *testing.T) {
 		require.ElementsMatch(t, want, Project(m))
 	})
 
-	t.Run("override -z:(x)", func(t *testing.T) {
+	t.Run("-z:(x) override projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "z.x", Value: 1},
 		}
@@ -50,7 +50,7 @@ func TestToProjection(t *testing.T) {
 		require.ElementsMatch(t, want, Project(m))
 	})
 
-	t.Run("mixed a,-b,c:(d,-e),-z:(x)", func(t *testing.T) {
+	t.Run("a,-b,c:(d,-e),-z:(x) mixed projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "a", Value: 1},
 			{Key: "c.d", Value: 1},
@@ -62,7 +62,7 @@ func TestToProjection(t *testing.T) {
 		require.ElementsMatch(t, want, Project(m))
 	})
 
-	t.Run("negative with children", func(t *testing.T) {
+	t.Run("-a:(-b:(-c:(d:(e,-f),-g,y:(z,-w)))) negative with children projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "a.b.c.d.e", Value: 1},
 			{Key: "a.b.c.y.z", Value: 1},
@@ -74,7 +74,7 @@ func TestToProjection(t *testing.T) {
 		require.ElementsMatch(t, want, Project(m))
 	})
 
-	t.Run("mixed inclusion/exclusion", func(t *testing.T) {
+	t.Run("a,-b:(c),d:(e),f:(g:(h)),-i mixed inclusion exclusion projection", func(t *testing.T) {
 		want := bson.D{
 			{Key: "a", Value: 1},
 			{Key: "b.c", Value: 1},

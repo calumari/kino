@@ -9,7 +9,7 @@ import (
 )
 
 func TestMaskJSON(t *testing.T) {
-	t.Run("legacy marshal/unmarshal round trip", func(t *testing.T) {
+	t.Run("legacy marshal/unmarshal round trip success", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"a": {Op: kino.Positive},
 			"b": {Op: kino.Negative},
