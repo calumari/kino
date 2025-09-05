@@ -103,6 +103,10 @@ func MaskUnmarshalers() *json.Unmarshalers {
 // positive paths are emitted; negative or absent paths are omitted).
 func MarshalWithMask(m *Mask) *json.Marshalers {
 	return json.MarshalToFunc(func(enc *jsontext.Encoder, v any) error {
+		if m == nil {
+			return json.SkipFunc
+		}
+
 		var buf bytes.Buffer
 		if err := json.MarshalWrite(&buf, v); err != nil {
 			return fmt.Errorf("marshal mask source: %w", err)

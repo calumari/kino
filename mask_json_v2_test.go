@@ -47,6 +47,12 @@ func nodeNeg(children *kino.Mask) *kino.Node {
 }
 
 func TestMarshalWithMask(t *testing.T) {
+	t.Run("nil mask is skip", func(t *testing.T) {
+		out, err := json.Marshal(buildSample(), json.WithMarshalers(kino.MarshalWithMask(nil)))
+		require.NoError(t, err)
+		require.Equal(t, `{"a":"va","b":"vb","c":{"d":1,"e":2},"z":{"x":10,"y":20}}`, string(out))
+	})
+
 	t.Run("positive root simple includes projected", func(t *testing.T) {
 		m := maskPositive(map[string]*kino.Node{
 			"a": {Op: kino.Positive},
