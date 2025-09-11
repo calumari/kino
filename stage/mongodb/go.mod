@@ -1,4 +1,4 @@
-module github.com/calumari/kino/stage/mongo
+module github.com/calumari/kino/stage/mongodb
 
 go 1.25
 
