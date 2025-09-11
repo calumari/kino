@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/calumari/kino"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // Project converts a kino.Mask into a bson.D projection. Strategy:

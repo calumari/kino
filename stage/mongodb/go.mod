@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/calumari/kino v0.3.0
 	github.com/stretchr/testify v1.9.0
-	go.mongodb.org/mongo-driver v1.17.0
+	go.mongodb.org/mongo-driver/v2 v2.3.0
 )
 
 require (
